@@ -1,0 +1,105 @@
+// Prisma Schema for IoT Water Tank Monitoring System (PostgreSQL / Supabase)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum AlertLevel {
+  WASPADA
+  BAHAYA
+  KRITIS
+}
+
+enum AlertStatus {
+  ACTIVE
+  RESOLVED
+}
+
+enum CycleStatus {
+  NORMAL
+  ANOMALY
+}
+
+model Device {
+  id           String        @id @default("ESP32-001")
+  name         String        @default("Tandon Utama ESP32")
+  isOnline     Boolean       @default(true)
+  lastSeen     DateTime      @default(now())
+  wifiRssi     Int           @default(-65)
+  systemStatus String        @default("Normal") // Normal, Waspada, Bahaya, Kritis
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  telemetries  TelemetryLog[]
+  cycles       FillingCycle[]
+  alerts       Alert[]
+}
+
+model TelemetryLog {
+  id         String   @id @default(cuid())
+  deviceId   String
+  device     Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  timestamp  DateTime @default(now())
+  flowRate   Float    // Liters / minute
+  pulseCount Int      // Total pulses
+  isFlowing  Boolean  // debit > 0
+  wifiRssi   Int      @default(-65)
+
+  @@index([deviceId, timestamp])
+}
+
+model FillingCycle {
+  id              String      @id @default(cuid())
+  deviceId        String
+  device          Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  startTime       DateTime
+  endTime         DateTime?
+  durationMinutes Float       @default(0)
+  totalVolume     Float       @default(0) // Liters
+  status          CycleStatus @default(NORMAL)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([deviceId, startTime])
+}
+
+model Alert {
+  id             String      @id @default(cuid())
+  deviceId       String
+  device         Device      @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  code           String      // ALT-001..ALT-006
+  title          String
+  message        String
+  level          AlertLevel
+  status         AlertStatus @default(ACTIVE)
+  confidenceRate Int         @default(100) // 70%, 85%, 95%, 99%
+  createdAt      DateTime    @default(now())
+  resolvedAt     DateTime?
+
+  @@index([deviceId, status, createdAt])
+}
+
+model SystemSettings {
+  id                    String   @id @default("default")
+  tankCapacity          Float    @default(500) // Liter
+  normalFillTimeMinutes Float    @default(25)  // Menit
+  warningPumpMinutes    Float    @default(50)  // ALT-001 threshold (> 2x normal)
+  dangerPumpMinutes     Float    @default(75)  // ALT-002 threshold (> 3x normal)
+  leakIntervalMinutes   Float    @default(30)  // ALT-004/005 threshold jeda antar siklus
+  consecutiveLeakCycles Int      @default(2)   // Jumlah siklus berturut-turut untuk trigger leak
+  earlyMorningStart     String   @default("01:00") // Time string HH:mm
+  earlyMorningEnd       String   @default("04:00") // Time string HH:mm
+  offlineTimeoutMinutes Float    @default(5)   // ALT-006 ESP32 offline timeout
+  calibrationFactor     Float    @default(7.5) // Pulse per liter conversion factor
+  dataIntervalSeconds   Int      @default(5)   // Ingestion interval
+  notifyBrowser         Boolean  @default(true)
+  notifyEmail           Boolean  @default(false)
+  notifyWhatsApp        Boolean  @default(false)
+  emailAddress          String?
+  whatsAppNumber        String?
+  updatedAt             DateTime @updatedAt
+}
