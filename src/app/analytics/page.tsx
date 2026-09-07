@@ -105,10 +105,10 @@ export default function AnalyticsPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
             <LineChart className="w-7 h-7 text-cyan-600 dark:text-cyan-400" />
-            Grafik & Analisis Historis
+            Grafik & Historis
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-            Analisis tren debit air real-time, grafik historis pengisian, serta riwayat siklus tandon.
+            Melihat riwayat pengisian air pompa, perbandingan pemakaian harian, dan unduh data catatan.
           </p>
         </div>
 
@@ -117,75 +117,21 @@ export default function AnalyticsPage() {
           className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold rounded-xl shadow-lg flex items-center gap-2 transition-all self-start sm:self-auto"
         >
           <Download className="w-4 h-4" />
-          Export Data CSV
+          Unduh Data (CSV)
         </button>
-      </div>
-
-      {/* Realtime Debit Area Chart */}
-      <div className="glass-panel p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-6">
-          <div>
-            <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-ping inline-block" />
-              Grafik Debit Air Real-Time (L/menit)
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-400">Pembaruan otomatis tiap 5 detik dari sensor flow meter</p>
-          </div>
-          <div className="text-right">
-            <span className="text-xs text-slate-500 dark:text-slate-400">Debit Terbaru: </span>
-            <span className="font-mono text-cyan-600 dark:text-cyan-400 font-bold text-base">{latestTelemetry.flowRate.toFixed(1)} L/m</span>
-          </div>
-        </div>
-
-        <div className="h-64 w-full">
-          {isClient ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={realtimeChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorFlow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
-                <XAxis dataKey="time" stroke={textColor} fontSize={12} tickLine={false} />
-                <YAxis stroke={textColor} fontSize={12} tickLine={false} unit=" L/m" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: tooltipBg,
-                    borderColor: tooltipBorder,
-                    borderRadius: '0.75rem',
-                    color: tooltipText,
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
-                  }}
-                  formatter={(value: any) => [`${value} L/menit`, 'Debit Air']}
-                />
-                <Area type="monotone" dataKey="flowRate" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorFlow)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-full w-full flex items-center justify-center text-slate-400 text-xs">Memuat Grafik...</div>
-          )}
-        </div>
       </div>
 
       {/* Historical Area Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Volume per Cycle Chart */}
         <div className="glass-panel p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
-          <h3 className="font-bold text-base text-slate-900 dark:text-white mb-1">Volume Pengisian per Siklus (Liter)</h3>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mb-6">Akumulasi volume air tiap kali pompa menyala hingga mati</p>
+          <h3 className="font-bold text-base text-slate-900 dark:text-white mb-1">Catatan Air Tiap Kali Pompa Menyala (Liter)</h3>
+          <p className="text-xs text-slate-600 dark:text-slate-400 mb-6">Jumlah air yang masuk setiap kali mesin pompa menyala hingga mati</p>
 
-          <div className="h-60 w-full">
+          <div className="h-64 w-full">
             {isClient ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={cyclesChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorCycleVolume" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4} />
-                      <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0} />
-                    </linearGradient>
-                  </defs>
+                <BarChart data={cyclesChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
                   <XAxis dataKey="name" stroke={textColor} fontSize={12} tickLine={false} />
                   <YAxis stroke={textColor} fontSize={12} tickLine={false} unit=" L" />
@@ -197,10 +143,13 @@ export default function AnalyticsPage() {
                       color: tooltipText,
                       boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
                     }}
-                    formatter={(value: any) => [`${value} Liter`, 'Volume Pengisian']}
+                    formatter={(value: any, name: any) => [
+                      name === 'volume' ? `${value} Liter` : `${value} Menit`,
+                      name === 'volume' ? 'Volume Pengisian' : 'Durasi Pompa',
+                    ]}
                   />
-                  <Area type="monotone" dataKey="volume" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorCycleVolume)" />
-                </AreaChart>
+                  <Bar dataKey="volume" fill="#06b6d4" radius={[6, 6, 0, 0]} name="volume" />
+                </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="h-full w-full flex items-center justify-center text-slate-400 text-xs">Memuat Grafik...</div>
@@ -212,8 +161,8 @@ export default function AnalyticsPage() {
         <div className="glass-panel p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-bold text-base text-slate-900 dark:text-white">Konsumsi Air Harian vs Baseline</h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400">Perbandingan konsumsi vs rata-rata 7 hari terakhir</p>
+              <h3 className="font-bold text-base text-slate-900 dark:text-white">Perbandingan Pemakaian Air Harian</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400">Melihat pemakaian harian dibanding batas rata-rata normal</p>
             </div>
             <div className="flex gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
               <button
@@ -231,7 +180,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <div className="h-60 w-full">
+          <div className="h-64 w-full">
             {isClient ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={dailyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -254,7 +203,7 @@ export default function AnalyticsPage() {
                     }}
                     formatter={(value: any) => [`${value} Liter`, 'Volume Air']}
                   />
-                  <ReferenceLine y={420} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: 'Baseline (420L)', fill: '#f59e0b', fontSize: 10 }} />
+                  <ReferenceLine y={420} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: 'Rata-rata Normal (420L)', fill: '#f59e0b', fontSize: 10 }} />
                   <Area type="monotone" dataKey="volume" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorDailyVolume)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -270,7 +219,7 @@ export default function AnalyticsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
           <h3 className="font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
             <Table className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-            Tabel Riwayat Siklus Pengisian
+            Tabel Catatan Pengisian Air
           </h3>
 
           {/* Date Filter Inputs */}

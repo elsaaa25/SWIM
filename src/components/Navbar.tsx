@@ -61,12 +61,6 @@ export default function Navbar({ device, activeAlertCount }: NavbarProps) {
             {device.isOnline ? 'Perangkat Online' : 'Perangkat Offline'}
           </span>
         </div>
-
-        {/* Live Indicator */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-xs">
-          <Zap className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400 animate-pulse" />
-          <span className="text-cyan-600 dark:text-cyan-300 font-semibold">LIVE</span>
-        </div>
       </div>
     </header>
   );

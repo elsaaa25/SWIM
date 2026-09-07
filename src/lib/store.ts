@@ -33,8 +33,8 @@ const DEFAULT_SETTINGS: SystemSettingsData = {
 const DEFAULT_DEVICE: DeviceState = {
   id: 'SWIM-001',
   name: 'Tandon Utama SWIM-01',
-  isOnline: true,
-  lastSeen: new Date().toISOString(),
+  isOnline: false,
+  lastSeen: new Date(0).toISOString(), // Belum pernah konek saat awal
   wifiRssi: -62,
   systemStatus: 'Normal',
 };
@@ -98,6 +98,12 @@ class WaterTankStore {
   }
 
   public getDevice(): DeviceState {
+    // Jika data tidak diterima lebih dari 15 detik, anggap offline secara real-time
+    const lastSeenMs = new Date(this.device.lastSeen).getTime();
+    const nowMs = Date.now();
+    const isRecentlyActive = (nowMs - lastSeenMs) < 15000; // 15 detik threshold
+    
+    this.device.isOnline = isRecentlyActive;
     return this.device;
   }
 
@@ -140,6 +146,50 @@ class WaterTankStore {
       return true;
     }
     return false;
+  }
+
+  public triggerTestAlert(code: string = 'ALT-003'): AlertData {
+    const mockAlerts: Record<string, Omit<AlertData, 'id' | 'createdAt'>> = {
+      'ALT-003': {
+        deviceId: 'SWIM-001',
+        code: 'ALT-003',
+        title: 'Air Melebihi Kapasitas',
+        message: 'Periksa pelampung otomatis tandon.',
+        level: 'KRITIS',
+        status: 'ACTIVE',
+        confidenceRate: 99,
+      },
+      'ALT-004': {
+        deviceId: 'SWIM-001',
+        code: 'ALT-004',
+        title: 'Pengisian Dini Hari',
+        message: 'Periksa keran yang belum tertutup.',
+        level: 'BAHAYA',
+        status: 'ACTIVE',
+        confidenceRate: 88,
+      },
+      'ALT-001': {
+        deviceId: 'SWIM-001',
+        code: 'ALT-001',
+        title: 'Waktu Pengisian Lama',
+        message: 'Aliran air masuk sedang pelan.',
+        level: 'WASPADA',
+        status: 'ACTIVE',
+        confidenceRate: 75,
+      },
+    };
+
+    const template = mockAlerts[code] || mockAlerts['ALT-003'];
+    const alertObj: AlertData = {
+      ...template,
+      id: `alt-test-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+      createdAt: new Date().toISOString(),
+    };
+
+    this.alerts.unshift(alertObj);
+    this.reevaluateSystemStatus();
+    this.notifyListeners();
+    return alertObj;
   }
 
   public processHeartbeat(deviceId: string) {

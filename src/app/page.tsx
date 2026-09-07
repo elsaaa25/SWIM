@@ -40,20 +40,21 @@ export default function DashboardPage() {
   const isFlowing = latestTelemetry.isFlowing;
   const flowRate = latestTelemetry.flowRate;
 
+  // Volume & Percentage Calculation
+  const currentVolume = activeCycle ? activeCycle.totalVolume : settings.tankCapacity;
+  const fillPercentage = Math.min(100, Math.round((currentVolume / settings.tankCapacity) * 100));
+
   // Calculate Tank Status
   const getTankStatus = () => {
-    if (isFlowing) return { text: 'Mengisi Tandon', icon: RotateCw, color: 'text-cyan-600 dark:text-cyan-400', animate: 'animate-spin' };
+    if (isFlowing) return { text: 'Mengisi Air', icon: RotateCw, color: 'text-cyan-600 dark:text-cyan-400', animate: 'animate-spin' };
     const hasActiveAlert = alerts.some((a) => a.status === 'ACTIVE');
     if (hasActiveAlert) return { text: 'Perlu Perhatian', icon: AlertTriangle, color: 'text-amber-600 dark:text-amber-400', animate: 'animate-pulse' };
-    return { text: 'Tandon Penuh / Standby', icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-400', animate: '' };
+    if (fillPercentage >= 90) return { text: 'Tandon Penuh', icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-400', animate: '' };
+    return { text: 'Standby Normal', icon: CheckCircle2, color: 'text-emerald-600 dark:text-emerald-400', animate: '' };
   };
 
   const tankStatus = getTankStatus();
   const TankIcon = tankStatus.icon;
-
-  // Volume & Percentage Calculation
-  const currentVolume = activeCycle ? activeCycle.totalVolume : settings.tankCapacity;
-  const fillPercentage = Math.min(100, Math.round((currentVolume / settings.tankCapacity) * 100));
 
   // Hourly Data for Today
   const hourlyData = [
@@ -92,11 +93,11 @@ export default function DashboardPage() {
         <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
           Dashboard Utama
           <span className="text-xs px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30 font-medium">
-            Real-time Ingestion
+            Koneksi Terhubung
           </span>
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-          Visibilitas penuh pengisian air, status debit, dan grafik monitoring air harian.
+          Pantau sisa air tandon, kondisi mesin pompa, dan grafik pengisian air hari ini.
         </p>
       </div>
 
@@ -126,7 +127,7 @@ export default function DashboardPage() {
             <TankIcon className={`w-4 h-4 ${tankStatus.color} ${tankStatus.animate}`} />
           </div>
           <div className="mt-3">
-            <span className={`text-lg font-extrabold truncate block ${tankStatus.color}`}>{tankStatus.text}</span>
+            <span className={`text-base font-extrabold block whitespace-nowrap ${tankStatus.color}`}>{tankStatus.text}</span>
           </div>
           <div className="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
             <div
@@ -195,10 +196,10 @@ export default function DashboardPage() {
           <div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
               <LineChart className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
-              Grafik Monitoring Air per Hari
+              Grafik Pengisian Air Tandon
             </h2>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-              Visualisasi tren akumulasi air masuk dan aktivitas debit air tandon secara berkala.
+              Melihat jam berapa saja air mengisi tandon dan seberapa deras aliran airnya.
             </p>
           </div>
 
@@ -226,57 +227,6 @@ export default function DashboardPage() {
               <Calendar className="w-3.5 h-3.5" />
               7 Hari Terakhir
             </button>
-          </div>
-        </div>
-
-        {/* Quick Summary Badges */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-cyan-500/20 text-cyan-600 dark:text-cyan-400">
-              <Droplet className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Total Volume</p>
-              <p className="text-sm font-black font-mono text-cyan-700 dark:text-cyan-300">
-                {chartMode === 'today' ? `${todayStats.todayVolume > 0 ? todayStats.todayVolume : 1147} L` : '7,190 L'}
-              </p>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400">
-              <Gauge className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Puncak Debit</p>
-              <p className="text-sm font-black font-mono text-blue-700 dark:text-blue-300">
-                14.2 <span className="text-[10px] font-normal">L/mnt</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-              <TrendingUp className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Rata-rata / Hari</p>
-              <p className="text-sm font-black font-mono text-emerald-700 dark:text-emerald-300">
-                1,027 <span className="text-[10px] font-normal">L</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400">
-              <BarChart3 className="w-4 h-4" />
-            </div>
-            <div>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Total Siklus</p>
-              <p className="text-sm font-black font-mono text-amber-700 dark:text-amber-300">
-                {chartMode === 'today' ? `${todayStats.todayCycleCount > 0 ? todayStats.todayCycleCount : 3} siklus` : '23 siklus'}
-              </p>
-            </div>
           </div>
         </div>
 
@@ -309,7 +259,7 @@ export default function DashboardPage() {
                     }}
                     formatter={(value: any, name: any) => [
                       name === 'volume' ? `${value} Liter` : `${value} L/menit`,
-                      name === 'volume' ? 'Volume Pengisian' : 'Debit Air',
+                      name === 'volume' ? 'Volume Air Masuk' : 'Debit Air',
                     ]}
                   />
                   <Area
@@ -398,10 +348,10 @@ export default function DashboardPage() {
                         ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
                         : alert.level === 'BAHAYA'
                         ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
-                        : 'bg-yellow-500/20 text-yellow-700 dark:text-yellow-300'
+                        : 'bg-sky-500/20 text-sky-700 dark:text-sky-300'
                     }`}
                   >
-                    {alert.level}
+                    {alert.level === 'KRITIS' ? 'Cek Segera' : alert.level === 'BAHAYA' ? 'Perlu Diperiksa' : 'Catatan'}
                   </span>
                   <div>
                     <p className="text-xs font-semibold text-slate-900 dark:text-slate-200">{alert.title}</p>

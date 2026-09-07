@@ -26,8 +26,8 @@ interface RealtimeContextType {
 const defaultDevice: DeviceState = {
   id: 'SWIM-001',
   name: 'Tandon Utama SWIM-01',
-  isOnline: true,
-  lastSeen: new Date().toISOString(),
+  isOnline: false,
+  lastSeen: new Date(0).toISOString(),
   wifiRssi: -62,
   systemStatus: 'Normal',
 };
@@ -163,8 +163,22 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
+    // Timer lokal untuk memastikan status Offline jika tidak ada data baru dalam 60 detik (1 menit)
+    const offlineCheckInterval = setInterval(() => {
+      setDevice((prev) => {
+        const lastSeenMs = new Date(prev.lastSeen).getTime();
+        // Hanya ubah ke offline jika perangkat benar-benar tidak mengirim data selama 60 detik
+        const isRecentlyActive = (Date.now() - lastSeenMs) < 60000; // 60 detik threshold
+        if (prev.isOnline !== isRecentlyActive) {
+          return { ...prev, isOnline: isRecentlyActive };
+        }
+        return prev;
+      });
+    }, 1000);
+
     return () => {
       eventSource.close();
+      clearInterval(offlineCheckInterval);
     };
   }, []);
 

@@ -49,7 +49,7 @@ export default function Sidebar({ activeAlertCount }: { activeAlertCount: number
                     <Icon className={`w-5 h-5 ${isActive ? 'text-cyan-600' : 'text-slate-400'}`} />
                     <span>{item.name}</span>
                   </div>
-                  {item.name === 'Notifikasi & Alert' && activeAlertCount > 0 && (
+                  {item.href === '/alerts' && activeAlertCount > 0 && (
                     <span className="px-2 py-0.5 text-xs font-bold bg-rose-500 text-white rounded-full animate-pulse shadow-sm">
                       {activeAlertCount}
                     </span>

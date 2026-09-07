@@ -20,20 +20,20 @@ export default function AlertsPage() {
     switch (level) {
       case 'KRITIS':
         return (
-          <span className="px-3 py-1 text-xs font-bold bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 rounded-full flex items-center gap-1.5 glow-rose">
-            <AlertCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" /> KRITIS
+          <span className="px-2.5 py-0.5 text-xs font-bold bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-500/40 rounded-full flex items-center gap-1">
+            <AlertCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" /> Cek Segera
           </span>
         );
       case 'BAHAYA':
         return (
-          <span className="px-3 py-1 text-xs font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 rounded-full flex items-center gap-1.5 glow-amber">
-            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> BAHAYA
+          <span className="px-2.5 py-0.5 text-xs font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40 rounded-full flex items-center gap-1">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> Perlu Diperiksa
           </span>
         );
       default:
         return (
-          <span className="px-3 py-1 text-xs font-bold bg-yellow-500/20 text-yellow-700 dark:text-yellow-300 border border-yellow-500/40 rounded-full flex items-center gap-1.5">
-            <ShieldAlert className="w-3.5 h-3.5 text-yellow-600 dark:text-yellow-400" /> WASPADA
+          <span className="px-2.5 py-0.5 text-xs font-bold bg-sky-500/20 text-sky-700 dark:text-sky-300 border border-sky-500/40 rounded-full flex items-center gap-1">
+            <ShieldAlert className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" /> Catatan
           </span>
         );
     }

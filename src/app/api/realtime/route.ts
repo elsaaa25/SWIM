@@ -34,14 +34,14 @@ export async function GET() {
         }
       });
 
-      // Keep connection alive with heartbeat comment every 15s
+      // Keep connection alive with heartbeat comment every 10s
       const interval = setInterval(() => {
         try {
           controller.enqueue(encoder.encode(`: heartbeat\n\n`));
         } catch {
           clearInterval(interval);
         }
-      }, 15000);
+      }, 10000);
 
       // Clean up on cancel
       return () => {

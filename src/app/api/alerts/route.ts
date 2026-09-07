@@ -14,10 +14,21 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { alertId } = body;
+    const { action, alertId, code } = body;
 
+    // Test Alert Trigger Action
+    if (action === 'test') {
+      const createdAlert = store.triggerTestAlert(code || 'ALT-003');
+      return NextResponse.json({
+        status: 'ok',
+        message: `Alert simulasi ${createdAlert.code} berhasil dibuat`,
+        alert: createdAlert,
+      });
+    }
+
+    // Resolve Alert Action
     if (!alertId) {
-      return NextResponse.json({ error: 'Missing alertId' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing alertId or action' }, { status: 400 });
     }
 
     const success = store.resolveAlert(alertId);
@@ -31,7 +42,7 @@ export async function POST(request: Request) {
       alertId,
     });
   } catch (error) {
-    console.error('Error resolving alert:', error);
+    console.error('Error in alerts API:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
