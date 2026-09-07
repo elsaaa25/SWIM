@@ -199,7 +199,7 @@ export default function DashboardPage() {
               Grafik Pengisian Air Tandon
             </h2>
             <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-              Melihat jam berapa saja air mengisi tandon dan seberapa deras aliran airnya.
+              Pemantauan waktu pengisian air tandon serta laju debit aliran air secara berkala.
             </p>
           </div>
 
