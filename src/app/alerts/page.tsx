@@ -127,7 +127,7 @@ export default function AlertsPage() {
                   <div className="mt-1">{getLevelBadge(alert.level)}</div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800">
                         {alert.code}
                       </span>
                       <h3 className="font-bold text-base text-slate-900 dark:text-white">{alert.title}</h3>
@@ -137,7 +137,7 @@ export default function AlertsPage() {
                     </div>
                     <p className="text-xs text-slate-700 dark:text-slate-300 mt-2">{alert.message}</p>
 
-                    <div className="flex items-center gap-4 mt-3 text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+                    <div className="flex items-center gap-4 mt-3 text-[11px] text-slate-500 dark:text-slate-400">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3.5 h-3.5" /> Ditrigger:{' '}
                         {new Date(alert.createdAt).toLocaleString('id-ID')}

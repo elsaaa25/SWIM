@@ -29,7 +29,7 @@ import {
 } from 'recharts';
 
 export default function DashboardPage() {
-  const { device, latestTelemetry, activeCycle, alerts, settings, todayStats, theme } = useRealtime();
+  const { device, latestTelemetry, activeCycle, alerts, settings, todayStats, allCycles, theme } = useRealtime();
   const [chartMode, setChartMode] = useState<'today' | 'weekly'>('today');
   const [isClient, setIsClient] = useState(false);
 
@@ -56,28 +56,52 @@ export default function DashboardPage() {
   const tankStatus = getTankStatus();
   const TankIcon = tankStatus.icon;
 
-  // Hourly Data for Today
-  const hourlyData = [
-    { time: '00:00', volume: 0, flowRate: 0 },
-    { time: '03:00', volume: 120, flowRate: 8.5 },
-    { time: '06:00', volume: 380, flowRate: 14.2 },
-    { time: '09:00', volume: 250, flowRate: 11.0 },
-    { time: '12:00', volume: todayStats.todayVolume > 0 ? Math.round(todayStats.todayVolume * 0.4) : 370, flowRate: flowRate > 0 ? flowRate : 12.5 },
-    { time: '15:00', volume: isFlowing ? 280 : 0, flowRate: isFlowing ? flowRate : 0 },
-    { time: '18:00', volume: 0, flowRate: 0 },
-    { time: '21:00', volume: 0, flowRate: 0 },
-  ];
+  // === Build Hourly Chart from Real Cycles (Today) ===
+  const hourlyData = (() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayCycles = allCycles.filter(
+      (c) => c.endTime && c.startTime.startsWith(todayStr)
+    );
+    // Also include active cycle
+    if (activeCycle) todayCycles.push(activeCycle);
 
-  // 7-day Weekly Data
-  const weeklyData = [
-    { day: 'Senin', volume: 890, cycleCount: 3 },
-    { day: 'Selasa', volume: 1050, cycleCount: 4 },
-    { day: 'Rabu', volume: 780, cycleCount: 2 },
-    { day: 'Kamis', volume: 1120, cycleCount: 4 },
-    { day: 'Jumat', volume: 950, cycleCount: 3 },
-    { day: 'Sabtu', volume: 1200, cycleCount: 4 },
-    { day: 'Minggu', volume: todayStats.todayVolume > 0 ? todayStats.todayVolume : 1147, cycleCount: todayStats.todayCycleCount > 0 ? todayStats.todayCycleCount : 3 },
-  ];
+    // Bucket into 3-hour slots: 00, 03, 06, 09, 12, 15, 18, 21
+    const slots = [0, 3, 6, 9, 12, 15, 18, 21];
+    return slots.map((h) => {
+      const label = `${String(h).padStart(2, '0')}:00`;
+      const cyclsInSlot = todayCycles.filter((c) => {
+        const hour = new Date(c.startTime).getHours();
+        return hour >= h && hour < h + 3;
+      });
+      const volume = cyclsInSlot.reduce((acc, c) => acc + c.totalVolume, 0);
+      const avgFlow = cyclsInSlot.length > 0
+        ? cyclsInSlot.reduce((acc, c) => acc + (c.totalVolume / Math.max(c.durationMinutes, 1)), 0) / cyclsInSlot.length
+        : 0;
+      return { time: label, volume: Math.round(volume), flowRate: Number(avgFlow.toFixed(1)) };
+    });
+  })();
+
+  // === Build Weekly Chart from Real Cycles (Last 7 Days) ===
+  const weeklyData = (() => {
+    const dayLabels = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const result = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const dayCycles = allCycles.filter(
+        (c) => c.endTime && c.startTime.startsWith(dateStr)
+      );
+      const volume = dayCycles.reduce((acc, c) => acc + c.totalVolume, 0);
+      result.push({
+        day: dayLabels[d.getDay()],
+        volume: Math.round(volume),
+        cycleCount: dayCycles.length,
+      });
+    }
+    return result;
+  })();
+
 
   // Theme styling for charts (Light Mode)
   const gridColor = '#e2e8f0';
@@ -137,7 +161,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex justify-between text-[11px] text-slate-600 dark:text-slate-400 mt-1">
             <span>Estimasi</span>
-            <span className="font-mono text-cyan-600 dark:text-cyan-400 font-semibold">{fillPercentage}% ({currentVolume}L)</span>
+            <span className="text-cyan-600 dark:text-cyan-400 font-semibold">{fillPercentage}% ({currentVolume}L)</span>
           </div>
         </div>
 
@@ -148,7 +172,7 @@ export default function DashboardPage() {
             <Gauge className={`w-4 h-4 text-cyan-600 dark:text-cyan-400 ${isFlowing ? 'animate-pulse' : ''}`} />
           </div>
           <div className="mt-3">
-            <span className="text-2xl font-black text-cyan-600 dark:text-cyan-300 font-mono">
+            <span className="text-2xl font-black text-cyan-600 dark:text-cyan-300">
               {flowRate.toFixed(1)} <span className="text-xs font-normal text-slate-600 dark:text-slate-400">L/mnt</span>
             </span>
           </div>
@@ -165,12 +189,12 @@ export default function DashboardPage() {
             <Droplet className="w-4 h-4 text-blue-500 dark:text-blue-400" />
           </div>
           <div className="mt-3">
-            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
-              {todayStats.todayVolume > 0 ? todayStats.todayVolume : 1147} <span className="text-xs font-normal text-slate-600 dark:text-slate-400">Liter</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white">
+              {todayStats.todayVolume} <span className="text-xs font-normal text-slate-600 dark:text-slate-400">Liter</span>
             </span>
           </div>
           <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-2 truncate">
-            Dari {todayStats.todayCycleCount > 0 ? todayStats.todayCycleCount : 3} siklus pengisian
+            {todayStats.todayCycleCount > 0 ? `Dari ${todayStats.todayCycleCount} siklus pengisian` : 'Belum ada siklus hari ini'}
           </p>
         </div>
 
@@ -181,8 +205,8 @@ export default function DashboardPage() {
             <Clock className="w-4 h-4 text-amber-500 dark:text-amber-400" />
           </div>
           <div className="mt-3">
-            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
-              {todayStats.todayDurationMinutes > 0 ? todayStats.todayDurationMinutes : 62} <span className="text-xs font-normal text-slate-600 dark:text-slate-400">menit</span>
+            <span className="text-2xl font-black text-slate-900 dark:text-white">
+              {todayStats.todayDurationMinutes} <span className="text-xs font-normal text-slate-600 dark:text-slate-400">menit</span>
             </span>
           </div>
           <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-2 truncate">Waktu aktif pompa hari ini</p>

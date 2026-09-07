@@ -37,7 +37,7 @@ export default function Navbar({ device, activeAlertCount }: NavbarProps) {
           <h2 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <span>{device.name}</span>
           </h2>
-          <p className="text-xs text-cyan-600 dark:text-cyan-400 font-mono font-semibold flex items-center gap-1.5 mt-0.5">
+          <p className="text-xs text-cyan-600 dark:text-cyan-400 font-semibold flex items-center gap-1.5 mt-0.5">
             <Clock className="w-3.5 h-3.5 animate-pulse text-cyan-500" />
             <span>{liveTime || 'Memuat Waktu...'}</span>
           </p>

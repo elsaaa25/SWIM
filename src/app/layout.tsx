@@ -14,8 +14,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="id" className={cn("light", "font-sans", inter.variable)} suppressHydrationWarning>
-      <body className="bg-slate-50 text-slate-900 min-h-screen antialiased selection:bg-cyan-500 selection:text-white transition-colors duration-300">
+    <html lang="id" className={cn("light font-sans", inter.variable)} suppressHydrationWarning>
+      <body className={cn(inter.className, "bg-slate-50 text-slate-900 min-h-screen antialiased selection:bg-cyan-500 selection:text-white transition-colors duration-300")}>
         <RealtimeProvider>
           <AppLayoutClient>{children}</AppLayoutClient>
         </RealtimeProvider>

@@ -61,7 +61,7 @@ export default function SettingsPage() {
               type="number"
               value={formData.tankCapacity}
               onChange={(e) => handleChange('tankCapacity', Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:border-cyan-600 focus:bg-white"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cyan-600 focus:bg-white"
             />
             <p className="text-[11px] text-slate-500 mt-1">Digunakan untuk menghitung estimasi volume overflow / air luber.</p>
           </div>
@@ -72,7 +72,7 @@ export default function SettingsPage() {
               type="number"
               value={formData.normalFillTimeMinutes}
               onChange={(e) => handleChange('normalFillTimeMinutes', Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:border-cyan-600 focus:bg-white"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cyan-600 focus:bg-white"
             />
             <p className="text-[11px] text-slate-500 mt-1">Waktu acuan pengisian tandon dari posisi kosong hingga penuh.</p>
           </div>
@@ -93,7 +93,7 @@ export default function SettingsPage() {
               type="number"
               value={formData.warningPumpMinutes}
               onChange={(e) => handleChange('warningPumpMinutes', Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:border-cyan-600 focus:bg-white"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cyan-600 focus:bg-white"
             />
           </div>
 
@@ -103,7 +103,7 @@ export default function SettingsPage() {
               type="number"
               value={formData.leakIntervalMinutes}
               onChange={(e) => handleChange('leakIntervalMinutes', Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:border-cyan-600 focus:bg-white"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cyan-600 focus:bg-white"
             />
           </div>
 
@@ -113,7 +113,7 @@ export default function SettingsPage() {
               type="time"
               value={formData.earlyMorningStart}
               onChange={(e) => handleChange('earlyMorningStart', e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:border-cyan-600 focus:bg-white cursor-pointer"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cyan-600 focus:bg-white cursor-pointer"
             />
           </div>
 
@@ -123,7 +123,7 @@ export default function SettingsPage() {
               type="time"
               value={formData.earlyMorningEnd}
               onChange={(e) => handleChange('earlyMorningEnd', e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:border-cyan-600 focus:bg-white cursor-pointer"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cyan-600 focus:bg-white cursor-pointer"
             />
           </div>
         </div>
@@ -144,7 +144,7 @@ export default function SettingsPage() {
               step="0.1"
               value={formData.calibrationFactor}
               onChange={(e) => handleChange('calibrationFactor', Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:border-cyan-600 focus:bg-white"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cyan-600 focus:bg-white"
             />
             <p className="text-[11px] text-slate-500 mt-1">Konversi pulsa sensor flow meter ke debit air dalam Liter.</p>
           </div>
@@ -155,7 +155,7 @@ export default function SettingsPage() {
               type="number"
               value={formData.dataIntervalSeconds}
               onChange={(e) => handleChange('dataIntervalSeconds', Number(e.target.value))}
-              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 font-mono focus:outline-none focus:border-cyan-600 focus:bg-white"
+              className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-cyan-600 focus:bg-white"
             />
           </div>
         </div>

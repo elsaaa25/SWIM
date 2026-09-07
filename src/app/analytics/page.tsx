@@ -80,16 +80,33 @@ export default function AnalyticsPage() {
     duration: c.durationMinutes,
   }));
 
-  // Daily Consumption Chart Data vs Baseline (7 days average)
-  const dailyData = [
-    { day: 'Sen', volume: 450, baseline: 420 },
-    { day: 'Sel', volume: 410, baseline: 420 },
-    { day: 'Rab', volume: 480, baseline: 420 },
-    { day: 'Kam', volume: 430, baseline: 420 },
-    { day: 'Jum', volume: 510, baseline: 420 },
-    { day: 'Sab', volume: 460, baseline: 420 },
-    { day: 'Min', volume: 490, baseline: 420 },
-  ];
+  // Daily Consumption Chart Data vs Baseline (computed from real cycles, last 7 days)
+  const dailyData = (() => {
+    const dayLabels = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const daysToShow = filterPeriod === '30days' ? 30 : 7;
+    const result = [];
+    for (let i = daysToShow - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const dayCycles = cycles.filter(
+        (c) => c.endTime && c.startTime.startsWith(dateStr)
+      );
+      const volume = Math.round(dayCycles.reduce((acc, c) => acc + c.totalVolume, 0));
+      // For 30 days, use short date label; for 7 days use day name
+      const label = daysToShow === 7
+        ? dayLabels[d.getDay()]
+        : `${d.getDate()}/${d.getMonth() + 1}`;
+      result.push({ day: label, volume });
+    }
+    // Baseline = average of non-zero days
+    const nonZero = result.filter((r) => r.volume > 0);
+    const avgVolume = nonZero.length > 0
+      ? Math.round(nonZero.reduce((acc, r) => acc + r.volume, 0) / nonZero.length)
+      : 420;
+    return result.map((r) => ({ ...r, baseline: avgVolume }));
+  })();
+
 
   // Dynamic colors based on Theme (Light Mode)
   const gridColor = '#e2e8f0';
@@ -108,7 +125,7 @@ export default function AnalyticsPage() {
             Grafik & Historis
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-            Melihat riwayat pengisian air pompa, perbandingan pemakaian harian, dan unduh data catatan.
+            Pemantauan riwayat siklus pengisian tandon air, perbandingan pemakaian harian, serta unduhan data catatan operasional.
           </p>
         </div>
 
@@ -203,7 +220,7 @@ export default function AnalyticsPage() {
                     }}
                     formatter={(value: any) => [`${value} Liter`, 'Volume Air']}
                   />
-                  <ReferenceLine y={420} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: 'Rata-rata Normal (420L)', fill: '#f59e0b', fontSize: 10 }} />
+                  <ReferenceLine y={dailyData[0]?.baseline ?? 420} stroke="#f59e0b" strokeDasharray="4 4" label={{ value: `Rata-rata (${dailyData[0]?.baseline ?? 420}L)`, fill: '#f59e0b', fontSize: 10 }} />
                   <Area type="monotone" dataKey="volume" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#colorDailyVolume)" />
                 </AreaChart>
               </ResponsiveContainer>
@@ -268,7 +285,7 @@ export default function AnalyticsPage() {
                 <th className="p-3">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60 font-mono">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800/60">
               {cycles.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-8 text-slate-500 italic">

@@ -9,6 +9,7 @@ interface RealtimeContextType {
   activeCycle: FillingCycleData | null;
   alerts: AlertData[];
   recentTelemetries: TelemetryData[];
+  allCycles: FillingCycleData[];
   settings: SystemSettingsData;
   todayStats: {
     todayVolume: number;
@@ -80,6 +81,7 @@ const RealtimeContext = createContext<RealtimeContextType>({
   activeCycle: null,
   alerts: [],
   recentTelemetries: [],
+  allCycles: [],
   settings: defaultSettings,
   todayStats: defaultTodayStats,
   theme: 'dark',
@@ -95,6 +97,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
   const [activeCycle, setActiveCycle] = useState<FillingCycleData | null>(null);
   const [alerts, setAlerts] = useState<AlertData[]>([]);
   const [recentTelemetries, setRecentTelemetries] = useState<TelemetryData[]>([]);
+  const [allCycles, setAllCycles] = useState<FillingCycleData[]>([]);
   const [settings, setSettings] = useState<SystemSettingsData>(defaultSettings);
   const [todayStats, setTodayStats] = useState(defaultTodayStats);
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
@@ -122,9 +125,11 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
 
       // Compute Today Stats from cycles
       if (cyclesRes.cycles && Array.isArray(cyclesRes.cycles)) {
-        const allCycles: FillingCycleData[] = cyclesRes.cycles;
+        const fetchedCycles: FillingCycleData[] = cyclesRes.cycles;
+        setAllCycles(fetchedCycles);
+
         const todayStr = new Date().toISOString().split('T')[0];
-        const completedCycles = allCycles.filter((c) => c.endTime);
+        const completedCycles = fetchedCycles.filter((c) => c.endTime);
 
         const todayCompleted = completedCycles.filter(
           (c) => c.endTime && c.endTime.startsWith(todayStr)
@@ -219,6 +224,7 @@ export function RealtimeProvider({ children }: { children: React.ReactNode }) {
         activeCycle,
         alerts,
         recentTelemetries,
+        allCycles,
         settings,
         todayStats,
         theme,
